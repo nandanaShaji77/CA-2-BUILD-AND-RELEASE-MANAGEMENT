@@ -1,0 +1,19 @@
+---
+- name: User and Group Management on Utility Servers
+  hosts: utility_servers
+  become: yes
+  tasks:
+
+    - name: Create a system group devops_team
+      ansible.builtin.group:
+        name: devops_team
+        gid: 5000
+        state: present
+
+    - name: Create application user app_admin
+      ansible.builtin.user:
+        name: app_admin
+        group: devops_team
+        create_home: yes
+        shell: /bin/bash
+        state: present

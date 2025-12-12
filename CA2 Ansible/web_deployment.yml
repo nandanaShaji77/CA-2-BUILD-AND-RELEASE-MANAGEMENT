@@ -1,0 +1,39 @@
+---
+- name: Web Deployment on Frontend Servers
+  hosts: frontend_servers
+  become: yes
+
+  vars:
+    apache_pkg: apache2      # For Ubuntu
+    apache_service: apache2  # For Ubuntu
+    config_src: custom_vhost.conf
+    config_dest: /etc/apache2/conf-available/custom.conf
+
+  tasks:
+
+    - name: Install Apache web server
+      ansible.builtin.apt:
+        name: "{{ apache_pkg }}"
+        state: present
+        update_cache: yes
+
+    - name: Deploy custom Apache configuration
+      ansible.builtin.copy:
+        src: "{{ config_src }}"
+        dest: "{{ config_dest }}"
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Restart Apache
+
+    - name: Ensure Apache service is started and enabled
+      ansible.builtin.service:
+        name: "{{ apache_service }}"
+        state: started
+        enabled: yes
+
+  handlers:
+    - name: Restart Apache
+      ansible.builtin.service:
+        name: "{{ apache_service }}"
+        state: restarted
